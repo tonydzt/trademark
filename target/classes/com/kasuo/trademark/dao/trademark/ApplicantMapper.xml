@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kasuo.trademark.dao.trademark.ApplicantDao">
+
+    <resultMap id="resultMap" type="com.kasuo.trademark.domain.Applicant">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <id property="type" column="type" jdbcType="INTEGER"/>
+        <id property="applicantNameCn" column="applicant_name_cn" jdbcType="VARCHAR"/>
+        <id property="applicantNameEn" column="applicant_name_en" jdbcType="VARCHAR"/>
+        <id property="addressCn" column="address_cn" jdbcType="VARCHAR"/>
+        <id property="addressEn" column="address_en" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="find" resultMap="resultMap" parameterType="int">
+        SELECT
+        id, `type`, `applicant_name_cn`, `applicant_name_en`, address_cn, address_en
+        FROM
+        applicant
+        <where>
+            `id`=#{id}
+        </where>
+    </select>
+</mapper>

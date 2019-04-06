@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kasuo.trademark.dao.trademark.TrademarkBaseinfoDao">
+
+    <resultMap id="resultMap" type="com.kasuo.trademark.domain.TrademarkBaseinfo">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <id property="type" column="type" jdbcType="INTEGER"/>
+        <id property="trademarkName" column="trademark_name" jdbcType="VARCHAR"/>
+        <id property="date" column="date" jdbcType="DATE"/>
+        <id property="agentNo" column="agent_no" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="findPageByDate" resultMap="resultMap" parameterType="int">
+        SELECT
+        id, `type`, `trademark_name`, `date`, agent_no
+        FROM
+        trademark_baseinfo
+        <where>
+            `date`=#{date} and is_use = 0
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="findNextDate" resultMap="resultMap" parameterType="int">
+        SELECT
+        id, `type`, `trademark_name`, `date`, agent_no
+        FROM
+        trademark_baseinfo
+        <where>
+            `date`>#{date} and is_use = 0
+        </where>
+        ORDER BY `date` LIMIT 1;
+    </select>
+
+    <update id="updateUseStatus">
+        UPDATE trademark_baseinfo set is_use = 1
+        <where>
+            id in
+            <foreach item="item" index="index" collection="ids"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </update>
+
+</mapper>

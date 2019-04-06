@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kasuo.trademark.dao.trademark.AgentDao">
+
+    <resultMap id="resultMap" type="com.kasuo.trademark.domain.Agent">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <id property="name" column="name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="find" resultMap="resultMap" parameterType="int">
+        SELECT
+        id, `name`
+        FROM
+        agent
+        <where>
+            `id`=#{id}
+        </where>
+    </select>
+</mapper>
