@@ -9,14 +9,15 @@ import com.kasuo.trademark.domain.Applicant;
 import com.kasuo.trademark.domain.Trademark;
 import com.kasuo.trademark.domain.TrademarkBaseinfo;
 import com.kasuo.trademark.service.TrademarkService;
+import com.kasuo.trademark.util.SourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,30 +55,42 @@ public class TrademarkServiceImpl implements TrademarkService {
                 return trademarkList;
             }
 
-            for (TrademarkBaseinfo trademarkBaseinfo : trademarkBaseinfoList) {
+            Iterator<TrademarkBaseinfo> iterator = trademarkBaseinfoList.iterator();
+
+            while (iterator.hasNext()) {
+
+                TrademarkBaseinfo trademarkBaseinfo = iterator.next();
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
                 Applicant applicant = applicantDao.find(trademarkBaseinfo.getId());
                 Agent agent = agentDao.find(trademarkBaseinfo.getAgentNo());
 
-                Trademark trademark = new Trademark();
-                trademark.setRegistrationNo(trademarkBaseinfo.getId());
-                trademark.setCategory(trademarkBaseinfo.getType());
-                trademark.setTrademark(trademarkBaseinfo.getTrademarkName());
-                trademark.setDate(sdf.format(trademarkBaseinfo.getDate()));
-                trademark.setApplicant(applicant == null ? "" : applicant.getApplicantNameCn());
-                trademark.setAddress(applicant == null ? "" : applicant.getAddressCn());
-                trademark.setAgent(agent == null ? "" : agent.getName());
+                if (applicant == null) {
+                    iterator.remove();
+                    logger.warn("Has not found the applicant for {}", trademarkBaseinfo.getId());
+                    continue;
+                }
 
-                try {
-                    trademarkDao.save(trademark);
+                if (SourceUtil.checkValidSourceOrgName(applicant.getApplicantNameCn(), applicant.getAddressCn())) {
+                    Trademark trademark = new Trademark();
+                    trademark.setRegistrationNo(trademarkBaseinfo.getId());
+                    trademark.setCategory(trademarkBaseinfo.getType());
+                    trademark.setTrademark(trademarkBaseinfo.getTrademarkName());
+                    trademark.setDate(sdf.format(trademarkBaseinfo.getDate()));
+                    trademark.setApplicant(applicant.getApplicantNameCn());
+                    trademark.setAddress(applicant.getAddressCn());
+                    trademark.setAgent(agent == null ? "" : agent.getName());
 
-                    if (trademark.getId() != null) {
-                        trademarkList.add(trademark);
+                    try {
+                        trademarkDao.save(trademark);
+
+                        if (trademark.getId() != null) {
+                            trademarkList.add(trademark);
+                        }
+                    } catch (Exception e) {
+                        logger.error("failed to save trademark. trademark: {}", trademark, e);
                     }
-                } catch (Exception e) {
-                    logger.error("failed to save trademark. trademark: {}", trademark, e);
                 }
             }
 

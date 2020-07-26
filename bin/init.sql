@@ -1,3 +1,7 @@
+CREATE SCHEMA shaobiaoju;
+
+use shaobiaoju;
+
 -- auto-generated definition
 CREATE TABLE agent
 (
